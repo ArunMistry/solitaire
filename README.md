@@ -7,7 +7,7 @@ I have used abstraction to separate code into different files, and added comment
 
 To install with GCC:
 
-```bash
+```
 > gcc game.c func.c -o game
 ```
 To play the game:
