@@ -17,7 +17,7 @@ Input can either be a **`coordinate + direction`**, or a special input.
 **Moving Pegs**: Enter a coordinate as shown on the terminal, followed by a direction.
 >**Example: 15s, 36a, 44w, 52d**
 
-**Special Inputs**: Enter **`u`** to undo once, **`r`** to restart the game, or **`q`** to quit the game.
+**Special Inputs**: Enter **`u`** to undo once, **`r`** to restart the game, **`i`** to list all inputs, or **`q`** to quit the game.
 
 ## Solution
 A sample set of solutions is provided in solutions.txt

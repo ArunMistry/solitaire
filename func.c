@@ -14,7 +14,7 @@ void intro() {
   printf(">>  |_____/   \\___/  |_| |_|  \\__|  \\__,_| |_| |_|     \\___|   <<\n");
   printf("\nWelcome to Solatire!!\n");
   printf("Enter the coordinates of the peg to move, followed by the direction with wasd.");
-  printf("\nExample: 22s, 57a, 32d.  Enter u to undo or r to restart the game.\n\n");
+  printf("\nExample: 22s, 57a, 32d.  Enter u to undo, r to restart, i to list inputs, q to quit.\n\n");
 }
 
 void outro(int board[7][7]) { 
@@ -44,10 +44,10 @@ void printBoard(int board[7][7]) {
       "╠════╬════╬════╬════╬════╬════╬════╣  ",
       "║ 51 ║ 52 ║ 53 ║ 54 ║ 55 ║ 56 ║ 57 ║  ",
       "╚════╩════╬════╬════╬════╬════╩════╝  ",
-      "          ║ 63 ║ 64 ║ 65 ║            ",
+      "          ║ 63 ║ 64 ║ 65 ║ q = Quit   ",
       "          ╠════╬════╬════╣ u = Undo   ",
       "          ║ 73 ║ 74 ║ 75 ║ r = Restart",
-      "          ╚════╩════╩════╝            "};
+      "          ╚════╩════╩════╝ i = Inputs "};
   char finalBoard[15][90] = {
       "        ╔═══╦═══╦═══╗        ",
       "  X   X ║ X ║ X ║ X ║ X   X  ",
@@ -111,11 +111,30 @@ char *getInput() {
   return coord;
 }
 
-void checkQuit(char *input) {
-  if (!strcmp(input, "q")) {
+int checkSpecial(char *input, Hist *history) {
+  if (!strcmp(input, "q")) {  // Check if quit
     printf("Program will now quit.");
     exit(0);
   }
+  if (!strcmp(input, "i")) {  // Check if list inputs
+    if (history->node) {      // Check if node exists
+      listHist(history->node);
+      printf("\n\n");
+    } else {
+      printf("No inputs have been entered yet.\n\n");
+    }
+    return 1;
+  }
+  return 0;
+}
+
+void listHist(Hist *history){
+  if (history->node == NULL) {
+    printf("Inputs: %s", history->input);
+    return;
+  }
+  listHist(history->node);
+  printf(" -> %s", history->input);
 }
 
 int undo(int board[7][7], char *input, Hist **history) {
@@ -154,6 +173,20 @@ int undo(int board[7][7], char *input, Hist **history) {
   return 0;
 }
 
+int restart(int board[7][7], char *input, Hist **history) {
+  if (!strcmp(input, "r")) {
+    if ((*history)->node) { // Check if list has atleast 2 nodes
+      while ((*history)->node) {
+        undo(board, "u", history); // Undo all inputs in list
+      }
+    } else {
+      printf("Game has already been intialized from the start.\n");
+    }
+    return 1;
+  }
+  return 0;
+}
+
 int validMove(int board[7][7], char *input) {
   int x, y;  // Coordinates
   char dir;  // Direction
@@ -167,41 +200,25 @@ int validMove(int board[7][7], char *input) {
   }
   if (board[--x][--y] == 1) {  // Decrement coordinates, then check if peg present
     char *direction = "";      // direction holds string to be printed if can't move
-    switch (dir) {             // If peg present, check if it can be moved
-      case 'w':
-        if (x - 2 >= 0 && board[x - 1][y] == 1 && board[x - 2][y] == 0) return 1;
-        direction = " upwards";
-      case 's':
-        if (x + 2 <= 6 && board[x + 1][y] == 1 && board[x + 2][y] == 0) return 1;
-        direction = " downwards";
-      case 'a':
-        if (y - 2 >= 0 && board[x][y - 1] == 1 && board[x][y - 2] == 0) return 1;
-        direction = " left";
-      case 'd':
-        if (y + 2 <= 6 && board[x][y + 1] == 1 && board[x][y + 2] == 0) return 1;
-        direction = " right";
-      default: // Prints if peg can not be moved
-        printf("Chosen peg can not be moved%s.", direction);
-        return 0;
+    if (dir == 'w') {          // Check all inputs and return 1 if move is possible
+      if (x - 2 >= 0 && board[x - 1][y] == 1 && board[x - 2][y] == 0) return 1;
+      direction = " upwards";  // Assign keyword to direction if can not be moved
+    } else if (dir == 's') {
+      if (x + 2 <= 6 && board[x + 1][y] == 1 && board[x + 2][y] == 0) return 1;
+      direction = " downwards";
+    } else if (dir == 'a') {
+      if (y - 2 >= 0 && board[x][y - 1] == 1 && board[x][y - 2] == 0) return 1;
+      direction = " left";
+    } else if (dir == 'd') {
+      if (y + 2 <= 6 && board[x][y + 1] == 1 && board[x][y + 2] == 0) return 1;
+      direction = " right";
     }
+    printf("Chosen peg can not be moved%s.", direction); // Print if can not move
+    return 0;
   } else {
     printf("No peg at chosen coordinates.");
     return 0;
   }
-}
-
-int restart(int board[7][7], char *input, Hist **history) {
-  if (!strcmp(input, "r")) {
-    if ((*history)->node) { // Check if list has atleast 2 nodes
-      while ((*history)->node) {
-        undo(board, "u", history); // Undo all inputs in list
-      }
-    } else {
-      printf("Game has already been intialized from the start.\n");
-    }
-    return 1;
-  }
-  return 0;
 }
 
 void movePeg(int board[7][7], char *input) {

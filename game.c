@@ -30,8 +30,8 @@ int main() {
     }
 
     input = getInput();
-    checkQuit(input); // Check for special inputs q/r/u
-    if (undo(board, input, &history) || restart(board, input, &history)) {
+    // Check for special inputs q/r/u/i
+    if (checkSpecial(input, history) || undo(board, input, &history) || restart(board, input, &history)) {
       anyMovesLeft = 1;
       continue;
     }
